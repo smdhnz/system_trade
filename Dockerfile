@@ -4,9 +4,13 @@ ENV TZ=Asia/Tokyo
 
 WORKDIR /app
 
-COPY requirements.txt .
-
-RUN pip install -r requirements.txt
+RUN pip install \
+  numpy<2 \
+  yfinance \
+  prophet \
+  pandas \
+  schedule \
+  requests
 
 COPY main.py .
 

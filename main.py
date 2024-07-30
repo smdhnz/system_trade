@@ -12,15 +12,16 @@ import schedule
 import yfinance as yf
 from prophet import Prophet
 
-ENDPOINT = "https://coincheck.com/api"
-TRADE_PRICE = 50000
-TAKE_PROFIT = 500
-STOP_LOSS = 100
+ENDPOINT = os.environ.get("ENDPOINT")
+TRADE_PRICE = int(os.environ.get("TRADE_PRICE"))
+TAKE_PROFIT = int(os.environ.get("TAKE_PROFIT"))
+STOP_LOSS = int(os.environ.get("STOP_LOSS"))
+API_KEY = os.environ.get("API_KEY")
+API_SECRET = os.environ.get("API_SECRET")
 
 position = None
 take_profit_count = 0
 stop_loss_count = 0
-
 jpy_amount = 100000
 btc_amount = 0.0
 

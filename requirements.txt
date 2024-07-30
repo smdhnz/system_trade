@@ -1,6 +1,0 @@
-numpy<2
-yfinance
-prophet
-pandas
-schedule
-requests
