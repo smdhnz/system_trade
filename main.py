@@ -18,6 +18,7 @@ TAKE_PROFIT = int(os.environ.get("TAKE_PROFIT"))
 STOP_LOSS = int(os.environ.get("STOP_LOSS"))
 API_KEY = os.environ.get("API_KEY")
 API_SECRET = os.environ.get("API_SECRET")
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 
 position = None
 take_profit_count = 0
@@ -47,6 +48,7 @@ def job_1():
             jpy_amount -= TRADE_PRICE
             position = "long"
             print(f"{current_datetime} BUY: {jpy_amount}")
+            send_message(f"{current_datetime} BUY: {jpy_amount}")
     elif position == "long":
         if trend == "down":
             jpy_amount += order("sell", btc_amount)
@@ -55,6 +57,7 @@ def job_1():
             take_profit_count = 0
             stop_loss_count = 0
             print(f"{current_datetime} SELL: {jpy_amount}")
+            send_message(f"{current_datetime} SELL: {jpy_amount}")
 
 
 def job_2():
@@ -71,6 +74,7 @@ def job_2():
                 position = None
                 take_profit_count = 0
                 print(f"{current_datetime} TAKE PROFIT: {jpy_amount}")
+                send_message(f"{current_datetime} TAKE PROFIT: {jpy_amount}")
         else:
             take_profit_count = 0
 
@@ -82,6 +86,7 @@ def job_2():
                 position = None
                 stop_loss_count = 0
                 print(f"{current_datetime} STOP LOSS: {jpy_amount}")
+                send_message(f"{current_datetime} STOP LOSS: {jpy_amount}")
         else:
             stop_loss_count = 0
 
@@ -149,6 +154,14 @@ def get_sell_rate(amount):
     params = {"pair": "btc_jpy", "order_type": "sell", "amount": amount}
     res = requests.get(ENDPOINT + "/exchange/orders/rate", params=params).json()
     return res["price"]
+
+
+def send_message(message):
+    response = requests.post(
+        WEBHOOK_URL,
+        data=json.dumps({"content": message}),
+        headers={"Content-Type": "application/json"},
+    )
 
 
 schedule.every().day.at("00:00").do(job_1)
