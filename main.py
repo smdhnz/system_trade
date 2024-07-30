@@ -8,12 +8,12 @@ from time import sleep
 
 import pandas as pd
 import requests
+import schedule
 import yfinance as yf
-from apscheduler.schedulers.background import BackgroundScheduler
 from prophet import Prophet
 
 ENDPOINT = "https://coincheck.com/api"
-TRADE_PRICE = 30000
+TRADE_PRICE = 50000
 TAKE_PROFIT = 500
 STOP_LOSS = 100
 
@@ -26,6 +26,7 @@ btc_amount = 0.0
 
 
 def job_1():
+    global position, take_profit_count, stop_loss_count, jpy_amount, btc_amount
     current_datetime = datetime.now()
 
     data = fetch_data(
@@ -56,13 +57,14 @@ def job_1():
 
 
 def job_2():
+    global position, take_profit_count, stop_loss_count, jpy_amount, btc_amount
     current_datetime = datetime.now()
 
     if position == "long":
         jpy = get_sell_rate(btc_amount)
         if (jpy - TRADE_PRICE) >= TAKE_PROFIT:
             take_profit_count += 1
-            if take_profit_count >= 3:
+            if take_profit_count >= 3 or (jpy - TRADE_PRICE) >= TAKE_PROFIT * 3:
                 jpy_amount += order("sell", btc_amount)
                 btc_amount = 0.0
                 position = None
@@ -73,7 +75,7 @@ def job_2():
 
         if (TRADE_PRICE - jpy) >= STOP_LOSS:
             stop_loss_count += 1
-            if stop_loss_count >= 3:
+            if stop_loss_count >= 3 or (TRADE_PRICE - jpy) >= STOP_LOSS * 3:
                 jpy_amount += order("sell", btc_amount)
                 btc_amount = 0.0
                 position = None
@@ -102,7 +104,7 @@ def fit_model(df):
 
 
 def predict_trend(model):
-    future = model.make_future_dataframe(periods=24, freq="H")
+    future = model.make_future_dataframe(periods=24, freq="h")
     forecast = model.predict(future)
     last_price = forecast.iloc[-25]["yhat"]
     future_price = forecast.iloc[-1]["yhat"]
@@ -148,13 +150,9 @@ def get_sell_rate(amount):
     return res["price"]
 
 
-if __name__ == "__main__":
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(job_1, "cron", hour=0, minute=0)
-    scheduler.add_job(job_2, "cron", minute=5)
-    scheduler.start()
-    try:
-        while True:
-            sleep(2)
-    except (KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
+schedule.every().day.at("00:00").do(job_1)
+schedule.every(5).minutes.do(job_2)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)

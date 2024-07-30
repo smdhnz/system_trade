@@ -2,5 +2,5 @@ numpy<2
 yfinance
 prophet
 pandas
-apscheduler
+schedule
 requests
