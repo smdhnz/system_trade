@@ -21,4 +21,5 @@ docker run \
   --init \
   --rm \
   --env-file .env \
+  --name $IMAGE_NAME \
   $IMAGE_NAME
