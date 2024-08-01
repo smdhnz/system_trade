@@ -3,6 +3,7 @@ import hmac
 import os
 import sys
 import time
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from time import sleep
 
@@ -47,8 +48,10 @@ def job_1():
             btc_amount = order("buy", TRADE_PRICE)
             jpy_amount -= TRADE_PRICE
             position = "long"
-            print(f"{current_datetime} BUY: {jpy_amount}")
-            send_message(f"{current_datetime} BUY: {jpy_amount}")
+            print(f"{current_datetime} - BUY: {jpy_amount}")
+            send_message(f"BUY: {jpy_amount}")
+        else:
+            print(f"{current_datetime} - HOLD")
     elif position == "long":
         if trend == "down":
             jpy_amount += order("sell", btc_amount)
@@ -56,8 +59,8 @@ def job_1():
             position = None
             take_profit_count = 0
             stop_loss_count = 0
-            print(f"{current_datetime} SELL: {jpy_amount}")
-            send_message(f"{current_datetime} SELL: {jpy_amount}")
+            print(f"{current_datetime} - SELL: {jpy_amount}")
+            send_message(f"SELL: {jpy_amount}")
 
 
 def job_2():
@@ -73,8 +76,8 @@ def job_2():
                 btc_amount = 0.0
                 position = None
                 take_profit_count = 0
-                print(f"{current_datetime} TAKE PROFIT: {jpy_amount}")
-                send_message(f"{current_datetime} TAKE PROFIT: {jpy_amount}")
+                print(f"{current_datetime} - TAKE PROFIT: {jpy_amount}")
+                send_message(f"TAKE PROFIT: {jpy_amount}")
         else:
             take_profit_count = 0
 
@@ -85,33 +88,51 @@ def job_2():
                 btc_amount = 0.0
                 position = None
                 stop_loss_count = 0
-                print(f"{current_datetime} STOP LOSS: {jpy_amount}")
-                send_message(f"{current_datetime} STOP LOSS: {jpy_amount}")
+                print(f"{current_datetime} - STOP LOSS: {jpy_amount}")
+                send_message(f"STOP LOSS: {jpy_amount}")
         else:
             stop_loss_count = 0
 
 
+@contextmanager
+def suppress_output():
+    # 標準出力と標準エラーを一時的に無効化
+    with open(os.devnull, "w") as f:
+        old_stdout = sys.stdout
+        old_stderr = sys.stderr
+        sys.stdout = f
+        sys.stderr = f
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+
+
 def fetch_data(start, end, interval="5m"):
-    df = yf.download(
-        tickers="BTC-JPY",
-        start=start,
-        end=end,
-        interval=interval,
-        ignore_tz=True,
-    )
+    with suppress_output():
+        df = yf.download(
+            tickers="BTC-JPY",
+            start=start,
+            end=end,
+            interval=interval,
+            ignore_tz=True,
+        )
     df = pd.DataFrame({"ds": df.index, "y": df["Adj Close"]}).reset_index(drop=True)
     return df
 
 
 def fit_model(df):
-    model = Prophet()
-    model.fit(df)
+    with suppress_output():
+        model = Prophet()
+        model.fit(df)
     return model
 
 
 def predict_trend(model):
-    future = model.make_future_dataframe(periods=24, freq="h")
-    forecast = model.predict(future)
+    with suppress_output():
+        future = model.make_future_dataframe(periods=24, freq="h")
+        forecast = model.predict(future)
     last_price = forecast.iloc[-25]["yhat"]
     future_price = forecast.iloc[-1]["yhat"]
     return "up" if future_price > last_price else "down"
