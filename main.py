@@ -33,9 +33,9 @@ def job_1():
     current_datetime = datetime.now()
 
     data = fetch_data(
-        start=current_datetime - timedelta(days=365),
+        start=current_datetime - timedelta(days=2),
         end=current_datetime,
-        interval="1h",
+        interval="5m",
     )
     if data.empty:
         return
@@ -131,10 +131,10 @@ def fit_model(df):
 
 def predict_trend(model):
     with suppress_output():
-        future = model.make_future_dataframe(periods=24, freq="h")
+        future = model.make_future_dataframe(periods=1, freq="h")  # 1時間先を予測
         forecast = model.predict(future)
-    last_price = forecast.iloc[-25]["yhat"]
-    future_price = forecast.iloc[-1]["yhat"]
+    last_price = forecast.iloc[-2]["yhat"]  # 最後の予測値の1時間前の価格
+    future_price = forecast.iloc[-1]["yhat"]  # 最後の予測値
     return "up" if future_price > last_price else "down"
 
 
@@ -185,7 +185,7 @@ def send_message(message):
     )
 
 
-schedule.every().day.at("00:00").do(job_1)
+schedule.every().hour.at(":00").do(job_1)
 schedule.every(5).minutes.do(job_2)
 
 while True:
