@@ -62,6 +62,8 @@ def job_1():
             stop_loss_count = 0
             print(f"{current_datetime} - SELL: {jpy_amount}")
             send_message(f"SELL: {jpy_amount}")
+        else:
+            print(f"{current_datetime} - HOLD")
 
 
 def job_2():
