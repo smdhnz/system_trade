@@ -7,23 +7,16 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" == "" ]]; then
-    echo "Image '$IMAGE_NAME' does not exist. Building..."
-    docker build -t $IMAGE_NAME .
-else
-    echo "Image '$IMAGE_NAME' already exists."
-fi
+docker rmi $IMAGE_NAME
 
-if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" == "" ]]; then
-  echo "Image '$IMAGE_NAME' does not exist. Build failed."
-else
-  docker run \
-    --interactive \
-    --tty \
-    --detach \
-    --init \
-    --rm \
-    --env-file .env \
-    --name $IMAGE_NAME \
-    $IMAGE_NAME
-fi
+docker build -t $IMAGE_NAME .
+
+# docker run --rm \
+docker run \
+  --interactive \
+  --tty \
+  --detach \
+  --init \
+  --env-file .env \
+  --name $IMAGE_NAME \
+  $IMAGE_NAME
