@@ -169,15 +169,15 @@ def order(order_type, amount):
 
     if res["success"] is True:
         if order_type == "buy":
-            return res["amount"]
+            return float(res["amount"])
         elif order_type == "sell":
-            return res["price"]
+            return float(res["price"])
 
 
 def get_sell_rate(amount):
     params = {"pair": "btc_jpy", "order_type": "sell", "amount": amount}
     res = requests.get(ENDPOINT + "/exchange/orders/rate", params=params).json()
-    return res["price"]
+    return float(res["price"])
 
 
 def send_message(message):
