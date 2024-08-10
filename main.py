@@ -50,7 +50,6 @@ def job_1():
             jpy_amount -= TRADE_PRICE
             position = "long"
             print(f"{current_datetime} - BUY: {jpy_amount}")
-            send_message(f"BUY: {jpy_amount}")
         else:
             print(f"{current_datetime} - HOLD")
     elif position == "long":
@@ -61,7 +60,6 @@ def job_1():
             take_profit_count = 0
             stop_loss_count = 0
             print(f"{current_datetime} - SELL: {jpy_amount}")
-            send_message(f"SELL: {jpy_amount}")
         else:
             print(f"{current_datetime} - HOLD")
 
@@ -80,7 +78,6 @@ def job_2():
                 position = None
                 take_profit_count = 0
                 print(f"{current_datetime} - TAKE PROFIT: {jpy_amount}")
-                send_message(f"TAKE PROFIT: {jpy_amount}")
         else:
             take_profit_count = 0
 
@@ -92,7 +89,6 @@ def job_2():
                 position = None
                 stop_loss_count = 0
                 print(f"{current_datetime} - STOP LOSS: {jpy_amount}")
-                send_message(f"STOP LOSS: {jpy_amount}")
         else:
             stop_loss_count = 0
 
@@ -178,14 +174,6 @@ def get_sell_rate(amount):
     params = {"pair": "btc_jpy", "order_type": "sell", "amount": amount}
     res = requests.get(ENDPOINT + "/exchange/orders/rate", params=params).json()
     return float(res["price"])
-
-
-def send_message(message):
-    response = requests.post(
-        WEBHOOK_URL,
-        data=json.dumps({"content": message}),
-        headers={"Content-Type": "application/json"},
-    )
 
 
 schedule.every().hour.at(":00").do(job_1)
