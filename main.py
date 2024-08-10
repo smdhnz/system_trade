@@ -49,9 +49,9 @@ def job_1():
             btc_amount = order("buy", TRADE_PRICE)
             jpy_amount -= TRADE_PRICE
             position = "long"
-            print(f"{current_datetime} - BUY: {jpy_amount}")
+            print(f"{current_datetime} - BUY: {jpy_amount + TRADE_PRICE}")
         else:
-            print(f"{current_datetime} - HOLD")
+            print(f"{current_datetime} - HOLD: {jpy_amount}")
     elif position == "long":
         if trend == "down":
             jpy_amount += order("sell", btc_amount)
@@ -61,7 +61,7 @@ def job_1():
             stop_loss_count = 0
             print(f"{current_datetime} - SELL: {jpy_amount}")
         else:
-            print(f"{current_datetime} - HOLD")
+            print(f"{current_datetime} - HOLD: {get_sell_rate(btc_amount)}")
 
 
 def job_2():
