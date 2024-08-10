@@ -34,7 +34,7 @@ def job_1():
     current_datetime = datetime.now()
 
     data = fetch_data(
-        start=current_datetime - timedelta(days=2),
+        start=current_datetime - timedelta(days=1),
         end=current_datetime,
         interval="5m",
     )
@@ -49,9 +49,9 @@ def job_1():
             btc_amount = order("buy", TRADE_PRICE)
             jpy_amount -= TRADE_PRICE
             position = "long"
-            print(f"{current_datetime} - BUY: {jpy_amount + TRADE_PRICE}")
+            print(f"{current_datetime}, BUY, {jpy_amount + TRADE_PRICE}")
         else:
-            print(f"{current_datetime} - HOLD: {jpy_amount}")
+            print(f"{current_datetime}, HOLD, {jpy_amount}")
     elif position == "long":
         if trend == "down":
             jpy_amount += order("sell", btc_amount)
@@ -59,9 +59,9 @@ def job_1():
             position = None
             take_profit_count = 0
             stop_loss_count = 0
-            print(f"{current_datetime} - SELL: {jpy_amount}")
+            print(f"{current_datetime}, SELL, {jpy_amount}")
         else:
-            print(f"{current_datetime} - HOLD: {get_sell_rate(btc_amount)}")
+            print(f"{current_datetime}, HOLD, {get_sell_rate(btc_amount) + jpy_amount}")
 
 
 def job_2():
@@ -77,7 +77,7 @@ def job_2():
                 btc_amount = 0.0
                 position = None
                 take_profit_count = 0
-                print(f"{current_datetime} - TAKE PROFIT: {jpy_amount}")
+                print(f"{current_datetime}, TAKE PROFIT, {jpy_amount}")
         else:
             take_profit_count = 0
 
@@ -88,7 +88,7 @@ def job_2():
                 btc_amount = 0.0
                 position = None
                 stop_loss_count = 0
-                print(f"{current_datetime} - STOP LOSS: {jpy_amount}")
+                print(f"{current_datetime}, STOP LOSS, {jpy_amount}")
         else:
             stop_loss_count = 0
 
