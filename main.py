@@ -34,7 +34,7 @@ def job_1():
     current_datetime = datetime.now()
 
     data = fetch_data(
-        start=current_datetime - timedelta(days=1),
+        start=current_datetime - timedelta(days=365),
         end=current_datetime,
         interval="5m",
     )
@@ -129,11 +129,12 @@ def fit_model(df):
 
 
 def predict_trend(model):
+    periods = 24
     with suppress_output():
-        future = model.make_future_dataframe(periods=1, freq="h")  # 1時間先を予測
+        future = model.make_future_dataframe(periods=periods, freq="h")  # 1時間先を予測
         forecast = model.predict(future)
-    last_price = forecast.iloc[-2]["yhat"]  # 最後の予測値の1時間前の価格
-    future_price = forecast.iloc[-1]["yhat"]  # 最後の予測値
+    last_price = forecast.iloc[-periods - 1]["yhat"]
+    future_price = forecast.iloc[-1]["yhat"]
     return "up" if future_price > last_price else "down"
 
 
@@ -176,7 +177,7 @@ def get_sell_rate(amount):
     return float(res["price"])
 
 
-schedule.every().hour.at(":00").do(job_1)
+schedule.every().day.at("00:00").do(job_1)
 for minute in range(0, 60, 5):
     schedule.every().hour.at(f"{minute:02d}:00").do(job_2)
 
