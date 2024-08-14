@@ -178,7 +178,7 @@ def get_sell_rate(amount):
 
 
 schedule.every().day.at("00:00").do(job_1)
-for minute in range(0, 60, 5):
+for minute in range(5, 60, 5):
     schedule.every().hour.at(f"{minute:02d}:00").do(job_2)
 
 while True:
