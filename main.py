@@ -36,7 +36,7 @@ def job_1():
     data = fetch_data(
         start=current_datetime - timedelta(days=365),
         end=current_datetime,
-        interval="5m",
+        interval="1h",
     )
     if data.empty:
         return
