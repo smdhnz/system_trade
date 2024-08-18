@@ -129,11 +129,10 @@ def fit_model(df):
 
 
 def predict_trend(model):
-    periods = 24
     with suppress_output():
-        future = model.make_future_dataframe(periods=periods, freq="h")  # 1時間先を予測
+        future = model.make_future_dataframe(periods=24, freq="h")  # 1時間先を予測
         forecast = model.predict(future)
-    last_price = forecast.iloc[-periods - 1]["yhat"]
+    last_price = forecast.iloc[-25]["yhat"]
     future_price = forecast.iloc[-1]["yhat"]
     return "up" if future_price > last_price else "down"
 
